@@ -1,0 +1,30 @@
+# Makefile pour Windows (MinGW) avec SQLite "amalgamation" (sqlite3.c + sqlite3.h
+# placés dans ce dossier). Utilisation :  mingw32-make -f Makefile.windows
+CC      = gcc
+CFLAGS  = -Wall -Wextra -pedantic -std=c11 -g -MMD -MP
+SRC     = main.c magasin.c article.c client.c vente.c db.c ui.c utils.c
+OBJ     = $(SRC:.c=.o) sqlite3.o
+DEP     = $(SRC:.c=.d)
+BIN     = magasin.exe
+
+all: $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(OBJ) -o $@
+
+# SQLite est compilé à part (sans les options strictes de nos fichiers)
+sqlite3.o: sqlite3.c sqlite3.h
+	$(CC) -O2 -c sqlite3.c -o sqlite3.o
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+run: $(BIN)
+	$(BIN)
+
+clean:
+	del /Q /F *.o *.d $(BIN) 2>nul
+
+.PHONY: all run clean
+
+-include $(DEP)
